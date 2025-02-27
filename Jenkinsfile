@@ -9,23 +9,29 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 script {
-                    echo "🛠 Cleaning workspace..."
+                    echo " Cleaning workspace..."
                     sh 'rm -rf my_temp_project'
                     
-                    echo "📥 Cloning repository..."
+                    echo " Cloning repository..."
                     sh 'git clone https://github.com/Saiganesh-0918/my_temp_project.git my_temp_project'
 
-                    echo "✅ Repository cloned successfully!"
+                    echo " Repository cloned successfully!"
                     sh 'ls -la my_temp_project'
                 }
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Setup Virtual Environment') {
             steps {
                 script {
-                    echo "📦 Installing dependencies..."
-                    sh 'pip install --break-system-packages pytest'
+                    echo " Setting up Python virtual environment..."
+                    sh '''
+                        cd my_temp_project
+                        python3 -m venv venv
+                        source venv/bin/activate
+                        pip install --upgrade pip
+                        pip install pytest
+                    '''
                 }
             }
         }
@@ -33,9 +39,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    echo "🚀 Running tests..."
+                    echo " Running tests..."
                     sh '''
                         cd my_temp_project
+                        source venv/bin/activate
                         export PYTHONPATH=$WORKSPACE/my_temp_project/src
                         echo "PYTHONPATH is now set to: $PYTHONPATH"
                         pytest tests/ --capture=tee-sys
@@ -47,11 +54,12 @@ pipeline {
 
     post {
         success {
-            echo "✅ Pipeline completed successfully!"
+            echo " Pipeline completed successfully!"
         }
         failure {
-            echo "❌ Pipeline failed. Check the logs for details."
+            echo " Pipeline failed. Check the logs for details."
         }
     }
 }
+
 
