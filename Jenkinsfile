@@ -1,53 +1,53 @@
 pipeline {
     agent any
 
-    environment {
-        PYTHONPATH = "${WORKSPACE}/my_temp_project/src"
-    }
-
     stages {
         stage('Clone Repository') {
             steps {
-                script {
-                    echo " Cleaning workspace..."
-                    sh 'rm -rf my_temp_project'
-                    
-                    echo " Cloning repository..."
-                    sh 'git clone https://github.com/Saiganesh-0918/my_temp_project.git my_temp_project'
-
-                    echo " Repository cloned successfully!"
-                    sh 'ls -la my_temp_project'
-                }
+                echo " Cleaning workspace..."
+                sh 'rm -rf my_temp_project'  // Remove old files if they exist
+                
+                echo " Cloning repository..."
+                sh 'git clone https://github.com/Saiganesh-0918/my_temp_project.git'
+                
+                echo " Repository cloned successfully!"
+                sh 'ls -la my_temp_project'  // List files to confirm cloning
             }
         }
 
         stage('Setup Virtual Environment') {
             steps {
-                script {
-                    echo " Setting up Python virtual environment..."
-                    sh '''
-                        cd my_temp_project
-                        python3 -m venv venv
-                        . venv/bin/activate
-                        pip install --upgrade pip
-                        pip install pytest
-                    '''
-                }
+                echo " Setting up Python virtual environment..."
+                sh '''
+                    cd my_temp_project
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    echo " Virtual environment activated!"
+                '''
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                echo "Installing dependencies..."
+                sh '''
+                    cd my_temp_project
+                    source venv/bin/activate
+                    pip install --break-system-packages -r requirements.txt
+                    echo " Dependencies installed!"
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                script {
-                    echo " Running tests..."
-                    sh '''
-                        cd my_temp_project
-                        source venv/bin/activate
-                        export PYTHONPATH=$WORKSPACE/my_temp_project/src
-                        echo "PYTHONPATH is now set to: $PYTHONPATH"
-                        pytest tests/ --capture=tee-sys
-                    '''
-                }
+                echo " Running tests..."
+                sh '''
+                    cd my_temp_project
+                    source venv/bin/activate
+                    export PYTHONPATH=$(pwd)/src
+                    pytest tests/ --capture=tee-sys
+                '''
             }
         }
     }
@@ -61,5 +61,4 @@ pipeline {
         }
     }
 }
-
 
