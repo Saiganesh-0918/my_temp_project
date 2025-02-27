@@ -32,7 +32,7 @@ pipeline {
                 echo "Installing dependencies..."
                 sh '''
                     cd my_temp_project
-                    source venv/bin/activate
+                    . venv/bin/activate
                     pip install --break-system-packages -r requirements.txt
                     echo " Dependencies installed!"
                 '''
@@ -44,7 +44,7 @@ pipeline {
                 echo " Running tests..."
                 sh '''
                     cd my_temp_project
-                    source venv/bin/activate
+                    . venv/bin/activate
                     export PYTHONPATH=$(pwd)/src
                     pytest tests/ --capture=tee-sys
                 '''
